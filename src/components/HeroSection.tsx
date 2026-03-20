@@ -18,9 +18,9 @@ const HeroSection = () => {
         <img
           src={heroBg}
           alt=""
-          className="h-full w-full object-cover opacity-30"
+          className="h-full w-full object-cover opacity-60"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/60 via-background/80 to-background" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/30 via-background/50 to-background" />
       </div>
 
       <div className="container relative mx-auto flex min-h-[calc(100vh-4rem)] flex-col items-center justify-center px-4 text-center">
