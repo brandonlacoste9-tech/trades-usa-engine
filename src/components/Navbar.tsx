@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -17,12 +18,12 @@ const Navbar = () => {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
-        <a href="/" className="flex items-center gap-2">
+        <Link to="/" className="flex items-center gap-2">
           <img src={logo} alt="Trades USA" className="h-8 w-8" />
           <span className="font-display text-xl font-bold tracking-tight">
             TRADES<span className="text-gradient-primary">USA</span>
           </span>
-        </a>
+        </Link>
 
         <div className="hidden items-center gap-8 md:flex">
           {navLinks.map((link) => (
@@ -37,11 +38,11 @@ const Navbar = () => {
         </div>
 
         <div className="hidden items-center gap-3 md:flex">
-          <Button variant="ghost" size="sm">
-            Log In
+          <Button variant="ghost" size="sm" asChild>
+            <Link to="/auth">Log In</Link>
           </Button>
-          <Button variant="hero" size="sm">
-            Get Started
+          <Button variant="hero" size="sm" asChild>
+            <Link to="/auth">Get Started</Link>
           </Button>
         </div>
 
@@ -73,11 +74,11 @@ const Navbar = () => {
                 </a>
               ))}
               <div className="flex gap-3 pt-2">
-                <Button variant="ghost" size="sm" className="flex-1">
-                  Log In
+                <Button variant="ghost" size="sm" className="flex-1" asChild>
+                  <Link to="/auth" onClick={() => setMobileOpen(false)}>Log In</Link>
                 </Button>
-                <Button variant="hero" size="sm" className="flex-1">
-                  Get Started
+                <Button variant="hero" size="sm" className="flex-1" asChild>
+                  <Link to="/auth" onClick={() => setMobileOpen(false)}>Get Started</Link>
                 </Button>
               </div>
             </div>
