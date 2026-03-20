@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
 import CityLanding from "./pages/CityLanding";
+import BookingPage from "./pages/BookingPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/leads/:citySlug" element={<CityLanding />} />
+            <Route path="/book/:contractorId" element={<BookingPage />} />
             <Route
               path="/dashboard"
               element={
