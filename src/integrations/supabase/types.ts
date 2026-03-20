@@ -180,6 +180,7 @@ export type Database = {
           subscription_plan:
             | Database["public"]["Enums"]["subscription_plan"]
             | null
+          telegram_chat_id: string | null
           trade: Database["public"]["Enums"]["trade_type"] | null
           updated_at: string
           user_id: string
@@ -198,6 +199,7 @@ export type Database = {
           subscription_plan?:
             | Database["public"]["Enums"]["subscription_plan"]
             | null
+          telegram_chat_id?: string | null
           trade?: Database["public"]["Enums"]["trade_type"] | null
           updated_at?: string
           user_id: string
@@ -216,6 +218,7 @@ export type Database = {
           subscription_plan?:
             | Database["public"]["Enums"]["subscription_plan"]
             | null
+          telegram_chat_id?: string | null
           trade?: Database["public"]["Enums"]["trade_type"] | null
           updated_at?: string
           user_id?: string
