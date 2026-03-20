@@ -227,10 +227,13 @@ export type Database = {
         Row: {
           address: string | null
           city: string | null
+          claimed_at: string | null
+          claimed_by: string | null
           created_at: string
           description: string | null
           estimated_value: number | null
           id: string
+          is_claimed: boolean
           owner_contact: string | null
           owner_name: string | null
           permit_number: string | null
@@ -243,10 +246,13 @@ export type Database = {
         Insert: {
           address?: string | null
           city?: string | null
+          claimed_at?: string | null
+          claimed_by?: string | null
           created_at?: string
           description?: string | null
           estimated_value?: number | null
           id?: string
+          is_claimed?: boolean
           owner_contact?: string | null
           owner_name?: string | null
           permit_number?: string | null
@@ -259,10 +265,13 @@ export type Database = {
         Update: {
           address?: string | null
           city?: string | null
+          claimed_at?: string | null
+          claimed_by?: string | null
           created_at?: string
           description?: string | null
           estimated_value?: number | null
           id?: string
+          is_claimed?: boolean
           owner_contact?: string | null
           owner_name?: string | null
           permit_number?: string | null
