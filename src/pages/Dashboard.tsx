@@ -21,6 +21,7 @@ import MarketIntelCard from "@/components/dashboard/MarketIntelCard";
 import AutomationLogCard from "@/components/dashboard/AutomationLogCard";
 import ProfileSettingsCard from "@/components/dashboard/ProfileSettingsCard";
 import EliteOpportunitiesCard from "@/components/dashboard/EliteOpportunitiesCard";
+import ROICalculatorCard from "@/components/dashboard/ROICalculatorCard";
 
 const Dashboard = () => {
   const navigate = useNavigate();
