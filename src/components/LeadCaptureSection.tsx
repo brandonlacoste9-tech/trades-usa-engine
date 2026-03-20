@@ -3,6 +3,8 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 const trades = [
   "General Contracting",
@@ -16,12 +18,48 @@ const trades = [
   "Other",
 ];
 
+const tradeMap: Record<string, string> = {
+  "General Contracting": "general_contracting",
+  "HVAC": "hvac",
+  "Roofing": "roofing",
+  "Plumbing": "plumbing",
+  "Electrical": "electrical",
+  "Solar Installation": "solar",
+  "Landscaping": "landscaping",
+  "Renovations": "renovations",
+  "Other": "other",
+};
+
 const LeadCaptureSection = () => {
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
+    setLoading(true);
+    const form = new FormData(e.currentTarget);
+    const name = (form.get("name") as string).trim();
+    const email = (form.get("email") as string).trim();
+    const phone = (form.get("phone") as string).trim();
+    const trade = tradeMap[form.get("trade") as string] || "other";
+    const location = (form.get("location") as string).trim();
+
+    const { error } = await supabase.from("leads").insert({
+      name,
+      email,
+      phone,
+      trade: trade as any,
+      city: location,
+      source: "website",
+    });
+
+    setLoading(false);
+    if (error) {
+      toast({ title: "Error", description: "Something went wrong. Please try again.", variant: "destructive" });
+    } else {
+      setSubmitted(true);
+    }
   };
 
   return (
@@ -58,15 +96,16 @@ const LeadCaptureSection = () => {
               </div>
               <form onSubmit={handleSubmit} className="mt-8 space-y-4">
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Input placeholder="Full Name" required className="border-border/50 bg-background/50" />
-                  <Input placeholder="Company Name" required className="border-border/50 bg-background/50" />
+                  <Input name="name" placeholder="Full Name" required className="border-border/50 bg-background/50" />
+                  <Input name="company" placeholder="Company Name" className="border-border/50 bg-background/50" />
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
-                  <Input type="email" placeholder="Email" required className="border-border/50 bg-background/50" />
-                  <Input type="tel" placeholder="Phone" required className="border-border/50 bg-background/50" />
+                  <Input name="email" type="email" placeholder="Email" required className="border-border/50 bg-background/50" />
+                  <Input name="phone" type="tel" placeholder="Phone" required className="border-border/50 bg-background/50" />
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <select
+                    name="trade"
                     required
                     className="h-10 rounded-md border border-border/50 bg-background/50 px-3 text-sm text-foreground"
                   >
@@ -77,11 +116,11 @@ const LeadCaptureSection = () => {
                       </option>
                     ))}
                   </select>
-                  <Input placeholder="City, State" required className="border-border/50 bg-background/50" />
+                  <Input name="location" placeholder="City, State" required className="border-border/50 bg-background/50" />
                 </div>
-                <Button variant="hero" className="w-full gap-2" size="lg">
-                  Get My Free Market Report
-                  <ArrowRight size={18} />
+                <Button variant="hero" className="w-full gap-2" size="lg" disabled={loading}>
+                  {loading ? "Submitting..." : "Get My Free Market Report"}
+                  {!loading && <ArrowRight size={18} />}
                 </Button>
                 <p className="text-center text-xs text-muted-foreground">
                   No contracts. No per-lead fees. Cancel anytime.
