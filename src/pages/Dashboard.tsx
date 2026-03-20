@@ -181,6 +181,7 @@ const Dashboard = () => {
               setZipFilter={setZipFilter}
               subscriptionPlan={profile?.subscription_plan}
             />
+            <ROICalculatorCard />
             <AutomationLogCard />
             {profile?.user_id && (
               <ProfileSettingsCard
