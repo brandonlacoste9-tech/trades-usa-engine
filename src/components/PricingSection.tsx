@@ -4,61 +4,49 @@ import { Check, Star, Crown } from "lucide-react";
 
 const plans = [
   {
-    name: "The Web Starter",
-    price: 149,
-    description: "Get online and start building your digital foundation.",
+    name: "The Professional",
+    price: 499,
+    description: "Your complete revenue infrastructure — website, leads, and automation.",
     features: [
-      "Custom responsive website",
-      "Basic SEO optimization",
-      "Mobile-first design",
-      "Contact form integration",
+      "Custom high-convert website",
+      "1 City SEO landing page",
+      "Permit Radar access",
+      "SMS & Email automation",
+      "Planexa booking engine",
       "Google Business Profile setup",
     ],
     popular: false,
     elite: false,
   },
   {
-    name: "The Lead Engine",
-    price: 349,
-    description: "Turn your website into a lead-generating machine.",
+    name: "The Market Dominator",
+    price: 899,
+    description: "Full market mastery with AI scoring and multi-city reach.",
     features: [
-      "Everything in Web Starter",
-      "Lead capture automation",
-      "Planexa scheduling engine",
-      "Automated email follow-ups",
-      "Monthly SEO optimization",
-      "Contractor dashboard access",
+      "Everything in Professional",
+      "5 City SEO landing pages",
+      "Full ROI Dashboard",
+      "AI lead scoring",
+      "Multi-channel automation (Email + SMS)",
+      "Monthly strategy sessions",
+      "Priority support",
     ],
     popular: true,
     elite: false,
   },
   {
-    name: "The Market Dominator",
-    price: 599,
-    description: "Dominate your local market with full automation.",
-    features: [
-      "Everything in Lead Engine",
-      "Market intelligence feed",
-      "AI lead scoring",
-      "Multi-channel automation (Email + SMS)",
-      "Priority support",
-      "Quarterly strategy sessions",
-    ],
-    popular: false,
-    elite: false,
-  },
-  {
     name: "The Empire Builder",
-    price: 999,
-    description: "For contractors targeting luxury markets and high-value ZIP codes.",
+    price: 1999,
+    description: "Exclusive ZIP code authority for contractors targeting luxury markets.",
     features: [
-      "Everything in Market Dominator",
+      "Everything in Dominator",
       "Luxury ZIP code targeting (90210, 33139, etc.)",
-      "Premium lead scoring with property values",
+      "Exclusive $250k+ Elite permits",
+      "Instant Telegram alerts",
       "Dedicated account strategist",
       "White-glove onboarding",
-      "Custom integrations & API access",
       "Weekly strategy calls",
+      "Custom integrations & API access",
     ],
     popular: false,
     elite: true,
@@ -89,7 +77,7 @@ const PricingSection = () => {
           </p>
         </motion.div>
 
-        <div className="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-16 grid gap-6 md:grid-cols-3">
           {plans.map((plan, i) => (
             <motion.div
               key={plan.name}
