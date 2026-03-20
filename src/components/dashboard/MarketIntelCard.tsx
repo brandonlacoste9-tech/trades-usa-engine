@@ -3,7 +3,17 @@ import { supabase } from "@/integrations/supabase/client";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Building2, Search, Loader2, Flame, Gem, Zap, Lock } from "lucide-react";
+import {
+  Building2,
+  Search,
+  Loader2,
+  Flame,
+  Gem,
+  Zap,
+  Lock,
+  CheckCircle2,
+  Flag,
+} from "lucide-react";
 import { computeHeatScore } from "@/lib/api/permits";
 import { permitsApi } from "@/lib/api/permits";
 import { canViewElitePermits } from "@/hooks/useUserProfile";
@@ -44,6 +54,7 @@ const tierBadge = (tier: string) => {
 const MarketIntelCard = ({ zipFilter, setZipFilter, subscriptionPlan }: MarketIntelCardProps) => {
   const queryClient = useQueryClient();
   const [isScraping, setIsScraping] = useState(false);
+  const [claimingId, setClaimingId] = useState<string | null>(null);
   const showElite = canViewElitePermits(subscriptionPlan);
 
   const { data: permits = [] } = useQuery({
@@ -75,6 +86,49 @@ const MarketIntelCard = ({ zipFilter, setZipFilter, subscriptionPlan }: MarketIn
       toast.error("Failed to trigger scraper");
     } finally {
       setIsScraping(false);
+    }
+  };
+
+  const handleClaim = async (permit: Tables<"scraped_inventory">) => {
+    setClaimingId(permit.id);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) { toast.error("Please sign in first"); return; }
+
+      // 1. Mark permit as claimed
+      const { error: claimErr } = await supabase
+        .from("scraped_inventory")
+        .update({
+          is_claimed: true,
+          claimed_by: user.id,
+          claimed_at: new Date().toISOString(),
+        } as any)
+        .eq("id", permit.id);
+
+      if (claimErr) { toast.error("Failed to claim — may already be taken"); return; }
+
+      // 2. Copy to leads table
+      const { error: leadErr } = await supabase.from("leads").insert({
+        name: permit.owner_name || permit.description || "Permit Lead",
+        contractor_id: user.id,
+        project_type: permit.project_type || "permit",
+        city: permit.city,
+        state: permit.state,
+        zip_code: permit.zip_code,
+        notes: `Permit #${permit.permit_number}. Value: $${Number(permit.estimated_value || 0).toLocaleString()}. Address: ${permit.address || "N/A"}`,
+        source: "permit_claim",
+        status: "new",
+      });
+
+      if (leadErr) { toast.error("Claimed but failed to create lead"); return; }
+
+      toast.success("Project claimed and added to your leads!");
+      queryClient.invalidateQueries({ queryKey: ["permits"] });
+      queryClient.invalidateQueries({ queryKey: ["leads"] });
+    } catch {
+      toast.error("Claim failed");
+    } finally {
+      setClaimingId(null);
     }
   };
 
@@ -122,14 +176,17 @@ const MarketIntelCard = ({ zipFilter, setZipFilter, subscriptionPlan }: MarketIn
               project_type: p.project_type,
             });
 
-            // Gate elite permits for non-Empire/Dominator users
             const isGated = heat.tier === "elite" && !showElite;
+            const isClaimed = (p as any).is_claimed === true;
+            const isClaimingThis = claimingId === p.id;
 
             return (
               <div
                 key={p.id}
                 className={`rounded-lg border bg-background/30 p-3 transition-colors ${
-                  isGated
+                  isClaimed
+                    ? "border-border/20 opacity-50"
+                    : isGated
                     ? "border-border/20 opacity-60"
                     : heat.tier === "elite"
                     ? "border-destructive/30"
@@ -142,17 +199,39 @@ const MarketIntelCard = ({ zipFilter, setZipFilter, subscriptionPlan }: MarketIn
                   <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <Lock size={12} />
                     <span>
-                      High-value permit — <span className="font-medium text-primary">upgrade to Empire Builder</span> to
-                      unlock
+                      High-value permit —{" "}
+                      <span className="font-medium text-primary">upgrade to Empire Builder</span> to unlock
                     </span>
                   </div>
                 ) : (
                   <>
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs font-medium leading-tight">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-xs font-medium leading-tight flex-1">
                         {p.description || p.permit_number}
                       </p>
-                      {tierBadge(heat.tier)}
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {tierBadge(heat.tier)}
+                        {isClaimed ? (
+                          <span className="inline-flex items-center gap-1 rounded-full bg-green-500/15 px-2 py-0.5 text-[10px] font-bold text-green-500">
+                            <CheckCircle2 size={10} /> CLAIMED
+                          </span>
+                        ) : (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleClaim(p)}
+                            disabled={isClaimingThis}
+                            className="h-6 gap-1 px-2 text-[10px] font-bold text-primary hover:bg-primary/10"
+                          >
+                            {isClaimingThis ? (
+                              <Loader2 size={10} className="animate-spin" />
+                            ) : (
+                              <Flag size={10} />
+                            )}
+                            Claim
+                          </Button>
+                        )}
+                      </div>
                     </div>
                     <div className="mt-1 flex items-center justify-between">
                       <p className="text-xs text-muted-foreground">
