@@ -190,10 +190,16 @@ const Dashboard = () => {
             <ROICalculatorCard />
             <AutomationLogCard />
             {profile?.user_id && (
-              <ProfileSettingsCard
-                userId={profile.user_id}
-                telegramChatId={(profile as any).telegram_chat_id ?? null}
-              />
+              <>
+                <ShareBookingCard
+                  userId={profile.user_id}
+                  companyName={profile.company_name}
+                />
+                <ProfileSettingsCard
+                  userId={profile.user_id}
+                  telegramChatId={(profile as any).telegram_chat_id ?? null}
+                />
+              </>
             )}
           </div>
         </div>
