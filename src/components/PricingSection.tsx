@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Check, Star } from "lucide-react";
+import { Check, Star, Crown } from "lucide-react";
 
 const plans = [
   {
@@ -15,6 +15,7 @@ const plans = [
       "Google Business Profile setup",
     ],
     popular: false,
+    elite: false,
   },
   {
     name: "The Lead Engine",
@@ -29,6 +30,7 @@ const plans = [
       "Contractor dashboard access",
     ],
     popular: true,
+    elite: false,
   },
   {
     name: "The Market Dominator",
@@ -43,6 +45,23 @@ const plans = [
       "Quarterly strategy sessions",
     ],
     popular: false,
+    elite: false,
+  },
+  {
+    name: "The Empire Builder",
+    price: 999,
+    description: "For contractors targeting luxury markets and high-value ZIP codes.",
+    features: [
+      "Everything in Market Dominator",
+      "Luxury ZIP code targeting (90210, 33139, etc.)",
+      "Premium lead scoring with property values",
+      "Dedicated account strategist",
+      "White-glove onboarding",
+      "Custom integrations & API access",
+      "Weekly strategy calls",
+    ],
+    popular: false,
+    elite: true,
   },
 ];
 
@@ -70,7 +89,7 @@ const PricingSection = () => {
           </p>
         </motion.div>
 
-        <div className="mt-16 grid gap-6 md:grid-cols-3">
+        <div className="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           {plans.map((plan, i) => (
             <motion.div
               key={plan.name}
@@ -79,7 +98,9 @@ const PricingSection = () => {
               viewport={{ once: true }}
               transition={{ delay: i * 0.1 }}
               className={`relative rounded-xl border p-8 shadow-card ${
-                plan.popular
+                plan.elite
+                  ? "border-primary/60 bg-gradient-card shadow-glow ring-1 ring-primary/20"
+                  : plan.popular
                   ? "border-primary/40 bg-gradient-card shadow-glow"
                   : "border-border/50 bg-gradient-card"
               }`}
@@ -87,6 +108,11 @@ const PricingSection = () => {
               {plan.popular && (
                 <div className="absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-gradient-primary px-4 py-1 text-xs font-bold text-primary-foreground">
                   <Star size={12} /> Most Popular
+                </div>
+              )}
+              {plan.elite && (
+                <div className="absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-gradient-primary px-4 py-1 text-xs font-bold text-primary-foreground">
+                  <Crown size={12} /> Premium
                 </div>
               )}
               <h3 className="font-display text-xl font-bold">{plan.name}</h3>
@@ -108,10 +134,10 @@ const PricingSection = () => {
                 ))}
               </ul>
               <Button
-                variant={plan.popular ? "hero" : "hero-outline"}
+                variant={plan.popular || plan.elite ? "hero" : "hero-outline"}
                 className="mt-8 w-full"
               >
-                Get Started
+                {plan.elite ? "Contact Sales" : "Get Started"}
               </Button>
             </motion.div>
           ))}
