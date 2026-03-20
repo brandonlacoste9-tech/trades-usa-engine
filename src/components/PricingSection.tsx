@@ -1,11 +1,15 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Check, Star, Crown } from "lucide-react";
+import { Check, Star, Crown, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { STRIPE_TIERS } from "@/lib/stripe";
+import { toast } from "sonner";
 
 const plans = [
   {
-    name: "The Professional",
-    price: 499,
+    ...STRIPE_TIERS.professional,
     description: "Your complete revenue infrastructure — website, leads, and automation.",
     features: [
       "Custom high-convert website",
@@ -19,8 +23,7 @@ const plans = [
     elite: false,
   },
   {
-    name: "The Market Dominator",
-    price: 899,
+    ...STRIPE_TIERS.dominator,
     description: "Full market mastery with AI scoring and multi-city reach.",
     features: [
       "Everything in Professional",
@@ -35,8 +38,7 @@ const plans = [
     elite: false,
   },
   {
-    name: "The Empire Builder",
-    price: 1999,
+    ...STRIPE_TIERS.empire,
     description: "Exclusive ZIP code authority for contractors targeting luxury markets.",
     features: [
       "Everything in Dominator",
@@ -54,6 +56,34 @@ const plans = [
 ];
 
 const PricingSection = () => {
+  const navigate = useNavigate();
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  const handleSubscribe = async (priceId: string, planName: string) => {
+    setLoadingPlan(planName);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast.info("Sign in to subscribe");
+        navigate("/auth");
+        return;
+      }
+
+      const { data, error } = await supabase.functions.invoke("create-checkout", {
+        body: { priceId },
+      });
+
+      if (error) throw error;
+      if (data?.url) {
+        window.open(data.url, "_blank");
+      }
+    } catch (err: any) {
+      toast.error(err.message || "Failed to start checkout");
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
+
   return (
     <section id="pricing" className="py-24">
       <div className="container mx-auto px-4">
@@ -78,57 +108,68 @@ const PricingSection = () => {
         </motion.div>
 
         <div className="mt-16 grid gap-6 md:grid-cols-3">
-          {plans.map((plan, i) => (
-            <motion.div
-              key={plan.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.1 }}
-              className={`relative rounded-xl border p-8 shadow-card ${
-                plan.elite
-                  ? "border-primary/60 bg-gradient-card shadow-glow ring-1 ring-primary/20"
-                  : plan.popular
-                  ? "border-primary/40 bg-gradient-card shadow-glow"
-                  : "border-border/50 bg-gradient-card"
-              }`}
-            >
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-gradient-primary px-4 py-1 text-xs font-bold text-primary-foreground">
-                  <Star size={12} /> Most Popular
-                </div>
-              )}
-              {plan.elite && (
-                <div className="absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-gradient-primary px-4 py-1 text-xs font-bold text-primary-foreground">
-                  <Crown size={12} /> Premium
-                </div>
-              )}
-              <h3 className="font-display text-xl font-bold">{plan.name}</h3>
-              <p className="mt-1 text-sm text-muted-foreground">
-                {plan.description}
-              </p>
-              <div className="mt-6">
-                <span className="font-display text-5xl font-black text-gradient-primary">
-                  ${plan.price}
-                </span>
-                <span className="text-muted-foreground">/mo</span>
-              </div>
-              <ul className="mt-8 space-y-3">
-                {plan.features.map((f) => (
-                  <li key={f} className="flex items-start gap-2 text-sm">
-                    <Check size={16} className="mt-0.5 shrink-0 text-primary" />
-                    <span className="text-secondary-foreground">{f}</span>
-                  </li>
-                ))}
-              </ul>
-              <Button
-                variant={plan.popular || plan.elite ? "hero" : "hero-outline"}
-                className="mt-8 w-full"
+          {plans.map((plan, i) => {
+            const isLoading = loadingPlan === plan.name;
+            return (
+              <motion.div
+                key={plan.name}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.1 }}
+                className={`relative rounded-xl border p-8 shadow-card ${
+                  plan.elite
+                    ? "border-primary/60 bg-gradient-card shadow-glow ring-1 ring-primary/20"
+                    : plan.popular
+                    ? "border-primary/40 bg-gradient-card shadow-glow"
+                    : "border-border/50 bg-gradient-card"
+                }`}
               >
-                {plan.elite ? "Contact Sales" : "Get Started"}
-              </Button>
-            </motion.div>
-          ))}
+                {plan.popular && (
+                  <div className="absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-gradient-primary px-4 py-1 text-xs font-bold text-primary-foreground">
+                    <Star size={12} /> Most Popular
+                  </div>
+                )}
+                {plan.elite && (
+                  <div className="absolute -top-3 left-1/2 flex -translate-x-1/2 items-center gap-1 rounded-full bg-gradient-primary px-4 py-1 text-xs font-bold text-primary-foreground">
+                    <Crown size={12} /> Premium
+                  </div>
+                )}
+                <h3 className="font-display text-xl font-bold">{plan.name}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  {plan.description}
+                </p>
+                <div className="mt-6">
+                  <span className="font-display text-5xl font-black text-gradient-primary">
+                    ${plan.price.toLocaleString()}
+                  </span>
+                  <span className="text-muted-foreground">/mo</span>
+                </div>
+                <ul className="mt-8 space-y-3">
+                  {plan.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2 text-sm">
+                      <Check size={16} className="mt-0.5 shrink-0 text-primary" />
+                      <span className="text-secondary-foreground">{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Button
+                  variant={plan.popular || plan.elite ? "hero" : "hero-outline"}
+                  className="mt-8 w-full"
+                  disabled={isLoading}
+                  onClick={() => handleSubscribe(plan.price_id, plan.name)}
+                >
+                  {isLoading ? (
+                    <Loader2 size={16} className="animate-spin" />
+                  ) : plan.elite ? (
+                    "Contact Sales"
+                  ) : (
+                    "Get Started"
+                  )}
+                </Button>
+              </motion.div>
+            );
+          })}
         </div>
       </div>
     </section>
