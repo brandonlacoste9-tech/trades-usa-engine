@@ -14,16 +14,317 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      appointments: {
+        Row: {
+          client_email: string | null
+          client_name: string
+          client_phone: string | null
+          contractor_id: string
+          created_at: string
+          duration_minutes: number | null
+          id: string
+          lead_id: string | null
+          notes: string | null
+          scheduled_date: string
+          scheduled_time: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          client_email?: string | null
+          client_name: string
+          client_phone?: string | null
+          contractor_id: string
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          lead_id?: string | null
+          notes?: string | null
+          scheduled_date: string
+          scheduled_time: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          client_email?: string | null
+          client_name?: string
+          client_phone?: string | null
+          contractor_id?: string
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          lead_id?: string | null
+          notes?: string | null
+          scheduled_date?: string
+          scheduled_time?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      automated_logs: {
+        Row: {
+          channel: string
+          contractor_id: string | null
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json | null
+          recipient: string | null
+          status: string | null
+          subject: string | null
+        }
+        Insert: {
+          channel?: string
+          contractor_id?: string | null
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          recipient?: string | null
+          status?: string | null
+          subject?: string | null
+        }
+        Update: {
+          channel?: string
+          contractor_id?: string | null
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          recipient?: string | null
+          status?: string | null
+          subject?: string | null
+        }
+        Relationships: []
+      }
+      leads: {
+        Row: {
+          city: string | null
+          claimed_at: string | null
+          contractor_id: string | null
+          created_at: string
+          email: string | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          project_type: string | null
+          score: number | null
+          source: string | null
+          state: string | null
+          status: Database["public"]["Enums"]["lead_status"]
+          trade: Database["public"]["Enums"]["trade_type"] | null
+          updated_at: string
+          zip_code: string | null
+        }
+        Insert: {
+          city?: string | null
+          claimed_at?: string | null
+          contractor_id?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          project_type?: string | null
+          score?: number | null
+          source?: string | null
+          state?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          trade?: Database["public"]["Enums"]["trade_type"] | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Update: {
+          city?: string | null
+          claimed_at?: string | null
+          contractor_id?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          project_type?: string | null
+          score?: number | null
+          source?: string | null
+          state?: string | null
+          status?: Database["public"]["Enums"]["lead_status"]
+          trade?: Database["public"]["Enums"]["trade_type"] | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          city: string | null
+          company_name: string | null
+          contact_name: string | null
+          created_at: string
+          email: string | null
+          id: string
+          phone: string | null
+          state: string | null
+          stripe_customer_id: string | null
+          subscription_plan:
+            | Database["public"]["Enums"]["subscription_plan"]
+            | null
+          trade: Database["public"]["Enums"]["trade_type"] | null
+          updated_at: string
+          user_id: string
+          zip_code: string | null
+        }
+        Insert: {
+          city?: string | null
+          company_name?: string | null
+          contact_name?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          phone?: string | null
+          state?: string | null
+          stripe_customer_id?: string | null
+          subscription_plan?:
+            | Database["public"]["Enums"]["subscription_plan"]
+            | null
+          trade?: Database["public"]["Enums"]["trade_type"] | null
+          updated_at?: string
+          user_id: string
+          zip_code?: string | null
+        }
+        Update: {
+          city?: string | null
+          company_name?: string | null
+          contact_name?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          phone?: string | null
+          state?: string | null
+          stripe_customer_id?: string | null
+          subscription_plan?:
+            | Database["public"]["Enums"]["subscription_plan"]
+            | null
+          trade?: Database["public"]["Enums"]["trade_type"] | null
+          updated_at?: string
+          user_id?: string
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
+      scraped_inventory: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string
+          description: string | null
+          estimated_value: number | null
+          id: string
+          owner_contact: string | null
+          owner_name: string | null
+          permit_number: string | null
+          project_type: string | null
+          scraped_at: string
+          scraped_source: string | null
+          state: string | null
+          zip_code: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_value?: number | null
+          id?: string
+          owner_contact?: string | null
+          owner_name?: string | null
+          permit_number?: string | null
+          project_type?: string | null
+          scraped_at?: string
+          scraped_source?: string | null
+          state?: string | null
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          description?: string | null
+          estimated_value?: number | null
+          id?: string
+          owner_contact?: string | null
+          owner_name?: string | null
+          permit_number?: string | null
+          project_type?: string | null
+          scraped_at?: string
+          scraped_source?: string | null
+          state?: string | null
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "moderator" | "user"
+      lead_status: "new" | "contacted" | "qualified" | "converted" | "lost"
+      subscription_plan:
+        | "web_starter"
+        | "lead_engine"
+        | "market_dominator"
+        | "empire_builder"
+      trade_type:
+        | "hvac"
+        | "plumbing"
+        | "electrical"
+        | "roofing"
+        | "general_contracting"
+        | "landscaping"
+        | "solar"
+        | "pool"
+        | "hurricane_protection"
+        | "renovations"
+        | "other"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +451,28 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "moderator", "user"],
+      lead_status: ["new", "contacted", "qualified", "converted", "lost"],
+      subscription_plan: [
+        "web_starter",
+        "lead_engine",
+        "market_dominator",
+        "empire_builder",
+      ],
+      trade_type: [
+        "hvac",
+        "plumbing",
+        "electrical",
+        "roofing",
+        "general_contracting",
+        "landscaping",
+        "solar",
+        "pool",
+        "hurricane_protection",
+        "renovations",
+        "other",
+      ],
+    },
   },
 } as const
