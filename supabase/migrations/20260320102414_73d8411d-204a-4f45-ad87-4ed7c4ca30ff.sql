@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX IF NOT EXISTS idx_scraped_inventory_permit_number ON public.scraped_inventory (permit_number) WHERE permit_number IS NOT NULL;
