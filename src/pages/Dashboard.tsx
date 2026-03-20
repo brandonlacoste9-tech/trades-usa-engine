@@ -135,44 +135,48 @@ const Dashboard = () => {
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-3">
-          {/* Lead Radar */}
-          <div className="lg:col-span-2 rounded-xl border border-border/50 bg-gradient-card p-6 shadow-card">
-            <h2 className="flex items-center gap-2 font-display text-lg font-bold">
-              <Radar size={18} className="text-primary" /> Lead Radar
-            </h2>
-            {leads.length === 0 ? (
-              <p className="mt-6 text-center text-sm text-muted-foreground">
-                No leads yet. Share your website to start capturing leads.
-              </p>
-            ) : (
-              <div className="mt-4 space-y-3">
-                {leads.slice(0, 8).map((lead) => (
-                  <div
-                    key={lead.id}
-                    className="flex items-center justify-between rounded-lg border border-border/30 bg-background/30 px-4 py-3"
-                  >
-                    <div className="flex items-center gap-3">
-                      {statusIcon(lead.status)}
-                      <div>
-                        <p className="text-sm font-medium">{lead.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {lead.city && lead.state ? `${lead.city}, ${lead.state}` : lead.zip_code || "—"}{" "}
-                          · {lead.trade || lead.project_type || "General"}
-                        </p>
+          {/* Lead Radar + Appointments */}
+          <div className="lg:col-span-2 space-y-6">
+            <div className="rounded-xl border border-border/50 bg-gradient-card p-6 shadow-card">
+              <h2 className="flex items-center gap-2 font-display text-lg font-bold">
+                <Radar size={18} className="text-primary" /> Lead Radar
+              </h2>
+              {leads.length === 0 ? (
+                <p className="mt-6 text-center text-sm text-muted-foreground">
+                  No leads yet. Share your website to start capturing leads.
+                </p>
+              ) : (
+                <div className="mt-4 space-y-3">
+                  {leads.slice(0, 8).map((lead) => (
+                    <div
+                      key={lead.id}
+                      className="flex items-center justify-between rounded-lg border border-border/30 bg-background/30 px-4 py-3"
+                    >
+                      <div className="flex items-center gap-3">
+                        {statusIcon(lead.status)}
+                        <div>
+                          <p className="text-sm font-medium">{lead.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {lead.city && lead.state ? `${lead.city}, ${lead.state}` : lead.zip_code || "—"}{" "}
+                            · {lead.trade || lead.project_type || "General"}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary capitalize">
+                          {lead.status}
+                        </span>
+                        {lead.score ? (
+                          <p className="mt-0.5 text-xs text-muted-foreground">Score: {lead.score}</p>
+                        ) : null}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary capitalize">
-                        {lead.status}
-                      </span>
-                      {lead.score ? (
-                        <p className="mt-0.5 text-xs text-muted-foreground">Score: {lead.score}</p>
-                      ) : null}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <AppointmentsCard />
           </div>
 
           {/* Right column */}
