@@ -23,6 +23,7 @@ import ProfileSettingsCard from "@/components/dashboard/ProfileSettingsCard";
 import EliteOpportunitiesCard from "@/components/dashboard/EliteOpportunitiesCard";
 import ROICalculatorCard from "@/components/dashboard/ROICalculatorCard";
 import AppointmentsCard from "@/components/dashboard/AppointmentsCard";
+import ShareBookingCard from "@/components/dashboard/ShareBookingCard";
 
 const Dashboard = () => {
   const navigate = useNavigate();
