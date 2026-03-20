@@ -23,6 +23,7 @@ import ProfileSettingsCard from "@/components/dashboard/ProfileSettingsCard";
 import EliteOpportunitiesCard from "@/components/dashboard/EliteOpportunitiesCard";
 import ROICalculatorCard from "@/components/dashboard/ROICalculatorCard";
 import AppointmentsCard from "@/components/dashboard/AppointmentsCard";
+import ShareBookingCard from "@/components/dashboard/ShareBookingCard";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -189,10 +190,16 @@ const Dashboard = () => {
             <ROICalculatorCard />
             <AutomationLogCard />
             {profile?.user_id && (
-              <ProfileSettingsCard
-                userId={profile.user_id}
-                telegramChatId={(profile as any).telegram_chat_id ?? null}
-              />
+              <>
+                <ShareBookingCard
+                  userId={profile.user_id}
+                  companyName={profile.company_name}
+                />
+                <ProfileSettingsCard
+                  userId={profile.user_id}
+                  telegramChatId={(profile as any).telegram_chat_id ?? null}
+                />
+              </>
             )}
           </div>
         </div>
