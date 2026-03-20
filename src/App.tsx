@@ -27,6 +27,7 @@ const App = () => (
             <Route path="/auth" element={<Auth />} />
             <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/leads/:citySlug" element={<CityLanding />} />
+            <Route path="/book/:contractorId" element={<BookingPage />} />
             <Route
               path="/dashboard"
               element={
