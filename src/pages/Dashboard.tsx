@@ -22,6 +22,7 @@ import AutomationLogCard from "@/components/dashboard/AutomationLogCard";
 import ProfileSettingsCard from "@/components/dashboard/ProfileSettingsCard";
 import EliteOpportunitiesCard from "@/components/dashboard/EliteOpportunitiesCard";
 import ROICalculatorCard from "@/components/dashboard/ROICalculatorCard";
+import AppointmentsCard from "@/components/dashboard/AppointmentsCard";
 
 const Dashboard = () => {
   const navigate = useNavigate();
