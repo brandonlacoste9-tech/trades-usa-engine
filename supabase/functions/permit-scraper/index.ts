@@ -173,8 +173,8 @@ Deno.serve(async (req) => {
             totalInserted++;
           }
 
-          // If heat score > 80, log an automation event
-          if (heatScore > 80) {
+          // If heat score > 85, log + trigger Telegram alert
+          if (heatScore > 85) {
             await supabase.from("automated_logs").insert({
               event_type: "high_value_permit",
               channel: "system",
@@ -189,6 +189,31 @@ Deno.serve(async (req) => {
                 heat_score: heatScore,
               },
             });
+
+            // Chain telegram-notify for elite permits
+            try {
+              const notifyUrl = `${supabaseUrl}/functions/v1/telegram-notify`;
+              await fetch(notifyUrl, {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${supabaseKey}`,
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  permit: {
+                    permit_number: p.permit_no,
+                    description: p.desc,
+                    estimated_value: p.value,
+                    zip_code: p.zip,
+                    city: target.city,
+                    state: target.state,
+                    project_type: p.project_type,
+                  },
+                }),
+              });
+            } catch (notifyErr) {
+              console.error("Telegram notify chain failed:", notifyErr);
+            }
           }
         }
       }
