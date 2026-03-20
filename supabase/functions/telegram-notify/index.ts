@@ -25,17 +25,31 @@ Deno.serve(async (req) => {
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const body = await req.json();
-    const { permit, chat_ids } = body;
+    const { permit } = body;
 
-    // If chat_ids provided, send to those. Otherwise, look up Empire Builder users' telegram IDs.
-    let targetChatIds: string[] = chat_ids ?? [];
+    // Look up Empire Builder users with a telegram_chat_id
+    const { data: empireProfiles, error: profileErr } = await supabase
+      .from("profiles")
+      .select("telegram_chat_id, subscription_plan")
+      .eq("subscription_plan", "empire_builder")
+      .not("telegram_chat_id", "is", null);
 
-    if (targetChatIds.length === 0) {
-      // Fetch Empire Builder profiles that have a phone (used as telegram chat_id placeholder)
-      // In production, you'd store telegram_chat_id on the profile
-      console.log("No explicit chat_ids provided, skipping Telegram send.");
+    if (profileErr) {
+      console.error("Failed to fetch Empire profiles:", profileErr);
       return new Response(
-        JSON.stringify({ success: true, sent: 0, message: "No chat_ids configured" }),
+        JSON.stringify({ success: false, error: profileErr.message }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const chatIds = (empireProfiles ?? [])
+      .map((p: any) => p.telegram_chat_id)
+      .filter(Boolean);
+
+    if (chatIds.length === 0) {
+      console.log("No Empire Builder users with Telegram configured.");
+      return new Response(
+        JSON.stringify({ success: true, sent: 0, message: "No Empire Builder chat IDs configured" }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -52,13 +66,13 @@ Deno.serve(async (req) => {
       `💰 Value: <b>${value}</b>`,
       `🏗️ Type: ${permit.project_type || "General"}`,
       "",
-      "⚡ Log in to your Command Center to claim this lead before someone else does.",
+      "⚡ Log in to your Command Center to claim this lead.",
     ].join("\n");
 
     let sent = 0;
     const errors: string[] = [];
 
-    for (const chatId of targetChatIds) {
+    for (const chatId of chatIds) {
       const response = await fetch(`${GATEWAY_URL}/sendMessage`, {
         method: "POST",
         headers: {
@@ -92,6 +106,7 @@ Deno.serve(async (req) => {
         permit_number: permit.permit_number,
         estimated_value: permit.estimated_value,
         sent_count: sent,
+        target_count: chatIds.length,
         errors,
       },
     });

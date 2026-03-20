@@ -16,9 +16,11 @@ import {
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import type { Tables } from "@/integrations/supabase/types";
-import { useUserProfile } from "@/hooks/useUserProfile";
+import { useUserProfile, isEmpireBuilder } from "@/hooks/useUserProfile";
 import MarketIntelCard from "@/components/dashboard/MarketIntelCard";
 import AutomationLogCard from "@/components/dashboard/AutomationLogCard";
+import ProfileSettingsCard from "@/components/dashboard/ProfileSettingsCard";
+import EliteOpportunitiesCard from "@/components/dashboard/EliteOpportunitiesCard";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -68,6 +70,8 @@ const Dashboard = () => {
     }
   };
 
+  const showEmpire = isEmpireBuilder(profile?.subscription_plan);
+
   return (
     <div className="min-h-screen bg-background">
       <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
@@ -90,6 +94,17 @@ const Dashboard = () => {
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        {/* Empire Builder Elite Banner */}
+        {showEmpire && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-6"
+          >
+            <EliteOpportunitiesCard />
+          </motion.div>
+        )}
+
         {/* Stats */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
@@ -166,6 +181,12 @@ const Dashboard = () => {
               subscriptionPlan={profile?.subscription_plan}
             />
             <AutomationLogCard />
+            {profile?.user_id && (
+              <ProfileSettingsCard
+                userId={profile.user_id}
+                telegramChatId={(profile as any).telegram_chat_id ?? null}
+              />
+            )}
           </div>
         </div>
       </main>
