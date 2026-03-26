@@ -148,6 +148,8 @@ Deno.serve(async (req) => {
             project_type: p.project_type || "other",
           });
 
+          const heatTier = heatScore >= 80 ? "elite" : heatScore >= 60 ? "high" : heatScore >= 45 ? "medium" : "standard";
+
           const row = {
             permit_number: p.permit_no,
             description: p.desc || null,
@@ -160,6 +162,8 @@ Deno.serve(async (req) => {
             state: target.state,
             scraped_source: result.url || "firecrawl-search",
             scraped_at: p.date ? new Date(p.date).toISOString() : new Date().toISOString(),
+            heat_score: heatScore,
+            heat_tier: heatTier,
           };
 
           // Upsert by permit_number to avoid duplicates

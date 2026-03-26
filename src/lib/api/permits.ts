@@ -5,7 +5,6 @@ export const permitsApi = {
     const { data, error } = await supabase.functions.invoke("permit-scraper", {
       body: targets ? { targets } : {},
     });
-
     if (error) {
       return { success: false, error: error.message };
     }
@@ -13,12 +12,26 @@ export const permitsApi = {
   },
 };
 
-// Heat score calculation (mirrors edge function logic for display)
+// Heat score calculation — used as fallback when DB heat_score is null
 export function computeHeatScore(permit: {
   estimated_value: number | null;
   zip_code: string | null;
   project_type: string | null;
+  // From DB (migration 20260326000001)
+  heat_score?: number | null;
+  heat_tier?: string | null;
 }): { score: number; label: string; tier: "elite" | "high" | "medium" | "standard" } {
+  // Prefer persisted score from DB
+  if (permit.heat_score != null) {
+    const tier = (permit.heat_tier as "elite" | "high" | "medium" | "standard") ?? "standard";
+    const label =
+      tier === "elite" ? "🔥 Elite Lead" :
+      tier === "high"  ? "💎 High Value" :
+      tier === "medium"? "⚡ Opportunity" : "Standard";
+    return { score: permit.heat_score, label, tier };
+  }
+
+  // Fallback: compute client-side
   let score = 40;
 
   const val = permit.estimated_value ?? 0;
@@ -38,10 +51,10 @@ export function computeHeatScore(permit: {
   let label: string;
   let tier: "elite" | "high" | "medium" | "standard";
 
-  if (score >= 80) { label = "🔥 Elite Lead"; tier = "elite"; }
-  else if (score >= 60) { label = "💎 High Value"; tier = "high"; }
-  else if (score >= 45) { label = "⚡ Opportunity"; tier = "medium"; }
-  else { label = "Standard"; tier = "standard"; }
+  if (score >= 80)      { label = "🔥 Elite Lead";  tier = "elite";    }
+  else if (score >= 60) { label = "💎 High Value";  tier = "high";     }
+  else if (score >= 45) { label = "⚡ Opportunity"; tier = "medium";   }
+  else                  { label = "Standard";        tier = "standard"; }
 
   return { score, label, tier };
 }

@@ -235,6 +235,9 @@ export type Database = {
           created_at: string
           description: string | null
           estimated_value: number | null
+          // Added in migration 20260326000001
+          heat_score: number | null
+          heat_tier: "elite" | "high" | "medium" | "standard" | null
           id: string
           is_claimed: boolean
           owner_contact: string | null
@@ -254,6 +257,8 @@ export type Database = {
           created_at?: string
           description?: string | null
           estimated_value?: number | null
+          heat_score?: number | null
+          heat_tier?: "elite" | "high" | "medium" | "standard" | null
           id?: string
           is_claimed?: boolean
           owner_contact?: string | null
@@ -273,6 +278,8 @@ export type Database = {
           created_at?: string
           description?: string | null
           estimated_value?: number | null
+          heat_score?: number | null
+          heat_tier?: "elite" | "high" | "medium" | "standard" | null
           id?: string
           is_claimed?: boolean
           owner_contact?: string | null
