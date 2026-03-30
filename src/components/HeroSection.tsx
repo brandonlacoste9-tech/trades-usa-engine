@@ -3,9 +3,11 @@ import { motion } from "framer-motion";
 import { ArrowRight, Zap, Shield, TrendingUp } from "lucide-react";
 import heroBg from "@/assets/hero-bg.jpg";
 
+import { brand } from "@/lib/brandConfig";
+
 const stats = [
-  { value: "330M+", label: "US Population Served" },
-  { value: "50", label: "States Covered" },
+  { value: brand.ID === "USA" ? "330M+" : "40M+", label: `${brand.country} Population Served` },
+  { value: brand.ID === "USA" ? "50" : "10", label: brand.ID === "USA" ? "States Covered" : "Provinces Covered" },
   { value: "3.2x", label: "Avg ROI Increase" },
   { value: "<5min", label: "Lead Response Time" },
 ];

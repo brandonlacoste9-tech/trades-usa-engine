@@ -13,6 +13,8 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
+  BrainCircuit,
+  ArrowRight,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import type { Tables } from "@/integrations/supabase/types";
@@ -24,6 +26,8 @@ import EliteOpportunitiesCard from "@/components/dashboard/EliteOpportunitiesCar
 import ROICalculatorCard from "@/components/dashboard/ROICalculatorCard";
 import AppointmentsCard from "@/components/dashboard/AppointmentsCard";
 import ShareBookingCard from "@/components/dashboard/ShareBookingCard";
+
+import TelegramOnboardingBanner from "@/components/dashboard/TelegramOnboardingBanner";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -90,13 +94,56 @@ const Dashboard = () => {
               </span>
             )}
           </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2 text-muted-foreground">
-            <LogOut size={16} /> Sign Out
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="outline" size="sm" onClick={() => navigate("/research-assistant")} className="gap-2 text-xs border-primary/30 text-primary hover:bg-primary/10">
+              <BrainCircuit size={14} /> Research AI
+            </Button>
+            <Button variant="ghost" size="sm" onClick={handleLogout} className="gap-2 text-muted-foreground">
+              <LogOut size={16} /> Sign Out
+            </Button>
+          </div>
         </div>
       </header>
 
       <main className="container mx-auto px-4 py-8">
+        {/* Telegram Onboarding Banner */}
+        <TelegramOnboardingBanner isConnected={!!profile?.telegram_chat_id} />
+
+        {/* Research Assistant CTA */}
+        <motion.div
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-6"
+        >
+          <button
+            onClick={() => navigate("/research-assistant")}
+            className="w-full group relative overflow-hidden rounded-2xl border border-primary/30 bg-gradient-to-r from-primary/10 via-primary/5 to-blue-500/10 p-5 text-left transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10"
+          >
+            <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-primary/10 transition-colors" />
+            <div className="relative flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <div className="absolute -inset-1 bg-primary/30 rounded-xl blur-md animate-pulse" />
+                  <div className="relative bg-primary/20 p-3 rounded-xl border border-primary/30">
+                    <BrainCircuit size={24} className="text-primary" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="font-display text-base font-bold flex items-center gap-2">
+                    Research Assistant
+                    <span className="rounded-full bg-green-500/15 px-2 py-0.5 text-[10px] font-bold text-green-500 uppercase">Live</span>
+                  </h3>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Search permits, scrape market data, and get AI-analyzed leads in real time.
+                  </p>
+                </div>
+              </div>
+              <ArrowRight size={20} className="text-primary shrink-0 opacity-50 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+            </div>
+          </button>
+        </motion.div>
+
         {/* Empire Builder Elite Banner */}
         {showEmpire && (
           <motion.div
@@ -197,7 +244,8 @@ const Dashboard = () => {
                 />
                 <ProfileSettingsCard
                   userId={profile.user_id}
-                  telegramChatId={(profile as any).telegram_chat_id ?? null}
+                  telegramChatId={profile.telegram_chat_id}
+                  telegramBotToken={profile.telegram_bot_token}
                 />
               </>
             )}
@@ -205,6 +253,7 @@ const Dashboard = () => {
         </div>
       </main>
     </div>
+
   );
 };
 

@@ -12,6 +12,8 @@ const navLinks = [
   { label: "Markets", href: "#markets" },
 ];
 
+import { brand } from "@/lib/brandConfig";
+
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -19,9 +21,9 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2">
-          <img src={logo} alt="Trades USA" className="h-8 w-8" />
+          <img src={logo} alt={brand.name} className="h-8 w-8" />
           <span className="font-display text-xl font-bold tracking-tight">
-            TRADES<span className="text-gradient-primary">USA</span>
+            TRADES<span className="text-gradient-primary">{brand.ID === "USA" ? "USA" : "CANADA"}</span>
           </span>
         </Link>
 

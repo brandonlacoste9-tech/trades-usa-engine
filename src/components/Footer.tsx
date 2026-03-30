@@ -1,15 +1,17 @@
 import { Mail } from "lucide-react";
 import logo from "@/assets/logo.png";
 
+import { brand } from "@/lib/brandConfig";
+
 const Footer = () => {
   return (
     <footer className="border-t border-border/50 py-12">
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center justify-between gap-6 md:flex-row">
           <div className="flex items-center gap-2">
-            <img src={logo} alt="Trades USA" className="h-6 w-6" />
+            <img src={logo} alt={brand.name} className="h-6 w-6" />
             <span className="font-display text-lg font-bold">
-              TRADES<span className="text-gradient-primary">USA</span>
+              TRADES<span className="text-gradient-primary">{brand.ID === "USA" ? "USA" : "CANADA"}</span>
             </span>
           </div>
 

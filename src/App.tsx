@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import ResetPassword from "./pages/ResetPassword";
 import Dashboard from "./pages/Dashboard";
+import ResearchAssistant from "./pages/ResearchAssistant";
 import CityLanding from "./pages/CityLanding";
 import BookingPage from "./pages/BookingPage";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -33,6 +34,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <Dashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/research-assistant"
+              element={
+                <ProtectedRoute>
+                  <ResearchAssistant />
                 </ProtectedRoute>
               }
             />
