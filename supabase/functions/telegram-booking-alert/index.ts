@@ -6,19 +6,14 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/telegram";
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
-
-    const TELEGRAM_API_KEY = Deno.env.get("TELEGRAM_API_KEY");
-    if (!TELEGRAM_API_KEY) throw new Error("TELEGRAM_API_KEY is not configured");
+    const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
+    if (!TELEGRAM_BOT_TOKEN) throw new Error("TELEGRAM_BOT_TOKEN is not configured");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -33,10 +28,10 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Look up contractor's telegram_chat_id
+    // Look up contractor's telegram_chat_id and bot token
     const { data: profile } = await supabase
       .from("profiles")
-      .select("telegram_chat_id, company_name")
+      .select("telegram_chat_id, telegram_bot_token, company_name")
       .eq("user_id", contractor_id)
       .single();
 
@@ -60,13 +55,11 @@ Deno.serve(async (req) => {
       "⚡ Open your Command Center to review details.",
     ].join("\n");
 
-    const response = await fetch(`${GATEWAY_URL}/sendMessage`, {
+    const botToken = (profile as any)?.telegram_bot_token || Deno.env.get("TELEGRAM_BOT_TOKEN")!;
+
+    const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
       method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "X-Connection-Api-Key": TELEGRAM_API_KEY,
-        "Content-Type": "application/json",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         chat_id: chatId,
         text: message,
@@ -75,10 +68,10 @@ Deno.serve(async (req) => {
     });
 
     const data = await response.json();
-    if (!response.ok) {
+    if (!data.ok) {
       console.error("Telegram booking alert failed:", data);
       return new Response(
-        JSON.stringify({ success: false, error: `Telegram API failed [${response.status}]` }),
+        JSON.stringify({ success: false, error: `Telegram API failed [${data.description}]` }),
         { status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }

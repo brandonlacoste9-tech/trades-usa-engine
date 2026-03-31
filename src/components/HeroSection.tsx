@@ -56,11 +56,21 @@ const HeroSection = () => {
           </p>
 
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-            <Button variant="hero" size="lg" className="gap-2 px-8 text-base">
+            <Button 
+              variant="hero" 
+              size="lg" 
+              className="gap-2 px-8 text-base"
+              onClick={() => document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth' })}
+            >
               Start Getting Leads
               <ArrowRight size={18} />
             </Button>
-            <Button variant="hero-outline" size="lg" className="gap-2 px-8 text-base">
+            <Button 
+              variant="hero-outline" 
+              size="lg" 
+              className="gap-2 px-8 text-base"
+              onClick={() => document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth' })}
+            >
               See How It Works
             </Button>
           </div>

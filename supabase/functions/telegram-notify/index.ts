@@ -14,11 +14,8 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
-
-    const TELEGRAM_API_KEY = Deno.env.get("TELEGRAM_API_KEY");
-    if (!TELEGRAM_API_KEY) throw new Error("TELEGRAM_API_KEY is not configured");
+    const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN");
+    if (!TELEGRAM_BOT_TOKEN) throw new Error("TELEGRAM_BOT_TOKEN is not configured");
 
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -30,7 +27,7 @@ Deno.serve(async (req) => {
     // Look up Empire Builder users with a telegram_chat_id
     const { data: empireProfiles, error: profileErr } = await supabase
       .from("profiles")
-      .select("telegram_chat_id, subscription_plan")
+      .select("telegram_chat_id, telegram_bot_token, subscription_plan")
       .eq("subscription_plan", "empire_builder")
       .not("telegram_chat_id", "is", null);
 
@@ -72,14 +69,15 @@ Deno.serve(async (req) => {
     let sent = 0;
     const errors: string[] = [];
 
-    for (const chatId of chatIds) {
-      const response = await fetch(`${GATEWAY_URL}/sendMessage`, {
+    for (const profile of empireProfiles || []) {
+      const chatId = (profile as any).telegram_chat_id;
+      if (!chatId) continue;
+
+      const botToken = (profile as any).telegram_bot_token || Deno.env.get("TELEGRAM_BOT_TOKEN")!;
+
+      const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${LOVABLE_API_KEY}`,
-          "X-Connection-Api-Key": TELEGRAM_API_KEY,
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: chatId,
           text: message,
@@ -88,9 +86,9 @@ Deno.serve(async (req) => {
       });
 
       const data = await response.json();
-      if (!response.ok) {
+      if (!data.ok) {
         console.error(`Telegram send failed for ${chatId}:`, data);
-        errors.push(`${chatId}: ${JSON.stringify(data)}`);
+        errors.push(`${chatId}: ${data.description}`);
       } else {
         sent++;
       }
