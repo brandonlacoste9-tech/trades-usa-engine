@@ -40,19 +40,19 @@ const HeroSection = () => {
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary"
           >
             <Zap size={14} />
-            Agency-as-a-Service for Trade Contractors
+            Exclusive Lead Generation for Trade Contractors
           </motion.div>
 
           <h1 className="font-display text-5xl font-black leading-tight tracking-tight md:text-7xl lg:text-8xl">
-            We Build the Engine.
+            Stop Chasing Work.
             <br />
-            <span className="text-gradient-primary">You Get the Leads.</span>
+            <span className="text-gradient-primary">Own Your Market.</span>
           </h1>
 
           <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground md:text-xl">
-            Stop losing revenue to competitors who show up first on Google.
-            Our AI-powered platform delivers exclusive, qualified homeowner leads
-            directly to your phone — across all 50 states.
+            AI-powered permit intelligence and lead scoring that puts exclusive,
+            qualified project leads directly in your hands — before your
+            competitors even know they exist.
           </p>
 
           <div className="mt-10 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">

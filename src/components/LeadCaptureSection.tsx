@@ -149,19 +149,19 @@ const LeadCaptureSection = () => {
               <CheckCircle2 size={48} className="mx-auto text-primary" />
               <h3 className="mt-4 font-display text-2xl font-bold">You're In!</h3>
               <p className="mt-2 text-muted-foreground">
-                Our team will reach out within 24 hours to get your lead engine started.
+                We'll send your market report within 24 hours — showing live permit activity and open leads in your area.
               </p>
             </div>
           ) : (
             <>
               <div className="text-center">
                 <h2 className="font-display text-3xl font-bold md:text-4xl">
-                  Ready to
-                  <span className="text-gradient-primary"> Dominate?</span>
+                  See Your
+                  <span className="text-gradient-primary"> Free Market Report</span>
                 </h2>
                 <p className="mt-2 text-muted-foreground">
-                  Fill out the form and we'll show you exactly how many leads you're
-                  missing in your market.
+                  Enter your trade and location — we'll pull live permit data and show
+                  exactly how many exclusive leads are available in your market right now.
                 </p>
               </div>
               <form onSubmit={handleSubmit} className="mt-8 space-y-4">

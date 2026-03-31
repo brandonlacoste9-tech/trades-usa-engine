@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import {
   Radar,
-  CalendarClock,
   TrendingUp,
   Users,
   LogOut,
@@ -15,18 +14,14 @@ import {
   AlertCircle,
   BrainCircuit,
   ArrowRight,
+  Building2,
 } from "lucide-react";
 import logo from "@/assets/logo.png";
 import type { Tables } from "@/integrations/supabase/types";
-import { useUserProfile, isEmpireBuilder } from "@/hooks/useUserProfile";
+import { useUserProfile } from "@/hooks/useUserProfile";
 import MarketIntelCard from "@/components/dashboard/MarketIntelCard";
-import AutomationLogCard from "@/components/dashboard/AutomationLogCard";
-import ProfileSettingsCard from "@/components/dashboard/ProfileSettingsCard";
-import EliteOpportunitiesCard from "@/components/dashboard/EliteOpportunitiesCard";
 import ROICalculatorCard from "@/components/dashboard/ROICalculatorCard";
-import AppointmentsCard from "@/components/dashboard/AppointmentsCard";
-import ShareBookingCard from "@/components/dashboard/ShareBookingCard";
-
+import ProfileSettingsCard from "@/components/dashboard/ProfileSettingsCard";
 import TelegramOnboardingBanner from "@/components/dashboard/TelegramOnboardingBanner";
 
 const Dashboard = () => {
@@ -43,18 +38,6 @@ const Dashboard = () => {
         .order("created_at", { ascending: false })
         .limit(20);
       return (data ?? []) as Tables<"leads">[];
-    },
-  });
-
-  const { data: appointments = [] } = useQuery({
-    queryKey: ["appointments"],
-    queryFn: async () => {
-      const { data } = await supabase
-        .from("appointments")
-        .select("*")
-        .order("scheduled_date", { ascending: true })
-        .limit(10);
-      return (data ?? []) as Tables<"appointments">[];
     },
   });
 
@@ -76,8 +59,6 @@ const Dashboard = () => {
       default: return <Clock size={14} className="text-muted-foreground" />;
     }
   };
-
-  const showEmpire = isEmpireBuilder(profile?.subscription_plan);
 
   return (
     <div className="min-h-screen bg-background">
@@ -144,23 +125,12 @@ const Dashboard = () => {
           </button>
         </motion.div>
 
-        {/* Empire Builder Elite Banner */}
-        {showEmpire && (
-          <motion.div
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-6"
-          >
-            <EliteOpportunitiesCard />
-          </motion.div>
-        )}
-
         {/* Stats */}
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {[
             { icon: Users, label: "Total Leads", value: totalLeads, color: "text-primary" },
             { icon: Radar, label: "New Today", value: newLeads, color: "text-primary" },
-            { icon: CalendarClock, label: "Appointments", value: appointments.length, color: "text-primary" },
+            { icon: CheckCircle2, label: "Converted", value: converted, color: "text-green-500" },
             { icon: TrendingUp, label: "Conversion Rate", value: `${conversionRate}%`, color: "text-green-500" },
           ].map((stat) => (
             <motion.div
@@ -183,7 +153,7 @@ const Dashboard = () => {
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-3">
-          {/* Lead Radar + Appointments */}
+          {/* Lead Radar — full width left */}
           <div className="lg:col-span-2 space-y-6">
             <div className="rounded-xl border border-border/50 bg-gradient-card p-6 shadow-card">
               <h2 className="flex items-center gap-2 font-display text-lg font-bold">
@@ -191,11 +161,11 @@ const Dashboard = () => {
               </h2>
               {leads.length === 0 ? (
                 <p className="mt-6 text-center text-sm text-muted-foreground">
-                  No leads yet. Share your website to start capturing leads.
+                  No leads yet. Use the Research Assistant to start claiming permit leads.
                 </p>
               ) : (
                 <div className="mt-4 space-y-3">
-                  {leads.slice(0, 8).map((lead) => (
+                  {leads.slice(0, 10).map((lead) => (
                     <div
                       key={lead.id}
                       className="flex items-center justify-between rounded-lg border border-border/30 bg-background/30 px-4 py-3"
@@ -224,36 +194,28 @@ const Dashboard = () => {
               )}
             </div>
 
-            <AppointmentsCard />
-          </div>
-
-          {/* Right column */}
-          <div className="space-y-6">
+            {/* Market Intel full-width on desktop left col */}
             <MarketIntelCard
               zipFilter={zipFilter}
               setZipFilter={setZipFilter}
               subscriptionPlan={profile?.subscription_plan}
             />
+          </div>
+
+          {/* Right column */}
+          <div className="space-y-6">
             <ROICalculatorCard />
-            <AutomationLogCard />
             {profile?.user_id && (
-              <>
-                <ShareBookingCard
-                  userId={profile.user_id}
-                  companyName={profile.company_name}
-                />
-                <ProfileSettingsCard
-                  userId={profile.user_id}
-                  telegramChatId={profile.telegram_chat_id}
-                  telegramBotToken={profile.telegram_bot_token}
-                />
-              </>
+              <ProfileSettingsCard
+                userId={profile.user_id}
+                telegramChatId={profile.telegram_chat_id}
+                telegramBotToken={profile.telegram_bot_token}
+              />
             )}
           </div>
         </div>
       </main>
     </div>
-
   );
 };
 

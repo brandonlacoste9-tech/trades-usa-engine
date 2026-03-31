@@ -146,12 +146,12 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const openaiKey = Deno.env.get("OPENAI_API_KEY");
+    const deepseekKey = Deno.env.get("DEEPSEEK_API_KEY");
     const firecrawlKey = Deno.env.get("FIRECRAWL_API_KEY");
 
-    if (!openaiKey) {
+    if (!deepseekKey) {
       return new Response(
-        JSON.stringify({ error: "OPENAI_API_KEY not configured" }),
+        JSON.stringify({ error: "DEEPSEEK_API_KEY not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -178,15 +178,15 @@ Deno.serve(async (req) => {
       iterations++;
 
       const completionRes = await fetch(
-        "https://api.openai.com/v1/chat/completions",
+        "https://api.deepseek.com/v1/chat/completions",
         {
           method: "POST",
           headers: {
-            Authorization: `Bearer ${openaiKey}`,
+            Authorization: `Bearer ${deepseekKey}`,
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            model: "gpt-4o-mini",
+            model: "deepseek-chat",
             messages: conversationMessages,
             tools: TOOLS,
             tool_choice: "auto",
@@ -219,15 +219,15 @@ Deno.serve(async (req) => {
         const finalContent = assistantMessage.content || "";
 
         const streamRes = await fetch(
-          "https://api.openai.com/v1/chat/completions",
+          "https://api.deepseek.com/v1/chat/completions",
           {
             method: "POST",
             headers: {
-              Authorization: `Bearer ${openaiKey}`,
+              Authorization: `Bearer ${deepseekKey}`,
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              model: "gpt-4o-mini",
+              model: "deepseek-chat",
               messages: conversationMessages,
               tools: TOOLS,
               tool_choice: "none", // Force text-only for streaming

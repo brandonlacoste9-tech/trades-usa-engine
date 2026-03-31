@@ -67,7 +67,7 @@ async function streamChat(
 
   const contentType = res.headers.get("content-type") || "";
 
-  // SSE stream (text/event-stream from OpenAI passthrough)
+  // SSE stream (text/event-stream from DeepSeek passthrough)
   if (contentType.includes("text/event-stream") && res.body) {
     const reader = res.body.getReader();
     const decoder = new TextDecoder();
@@ -468,7 +468,7 @@ const ResearchAssistant = () => {
                 </span>
               </div>
               <p className="text-[10px] text-muted-foreground/40 font-medium">
-                Powered by Firecrawl & OpenAI
+                Powered by Firecrawl & DeepSeek
               </p>
             </div>
           </form>

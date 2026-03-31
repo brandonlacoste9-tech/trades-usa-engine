@@ -1,11 +1,11 @@
 import { motion } from "framer-motion";
 import {
   Radar,
-  Search,
-  Mail,
-  CalendarClock,
-  BarChart3,
+  MapPin,
   Smartphone,
+  BarChart3,
+  Zap,
+  Search,
 } from "lucide-react";
 
 const features = [
@@ -13,37 +13,37 @@ const features = [
     icon: Radar,
     title: "Lead Radar",
     description:
-      "Real-time lead tracking and AI-powered scoring. Know exactly which homeowners need your services before your competitors do.",
+      "Real-time lead tracking and AI-powered scoring. Know exactly which homeowners need your trade services before your competitors do.",
   },
   {
     icon: Search,
-    title: "Hyper-Local SEO",
+    title: "Permit Intelligence",
     description:
-      "Dominate Google in your city. We build and optimize your online presence so you show up first when homeowners search for your trade.",
+      "Scraped building permit data from county and city portals — delivered as actionable, ready-to-claim leads directly in your dashboard.",
   },
   {
-    icon: Mail,
-    title: "Automated Follow-Ups",
+    icon: Zap,
+    title: "AI Lead Scoring",
     description:
-      "Never miss a lead again. Automated email and SMS sequences nurture every prospect until they book — even while you're on a job site.",
-  },
-  {
-    icon: CalendarClock,
-    title: "Planexa Scheduling",
-    description:
-      "Your command center for site estimates. Homeowners book directly into your calendar — no phone tag, no missed appointments.",
+      "Every lead is automatically scored by project value, urgency, and ZIP code demand so you focus on the jobs worth chasing.",
   },
   {
     icon: BarChart3,
     title: "Market Intelligence",
     description:
-      "Scraped building permit data from county and city portals, delivered as actionable market opportunities in your dashboard.",
+      "See exactly where demand is surging in your area. Track permit activity, project types, and competitor gaps across every ZIP code.",
   },
   {
     icon: Smartphone,
-    title: "Instant Notifications",
+    title: "Instant Lead Alerts",
     description:
       "Get new lead alerts via SMS, email, and Telegram the second a homeowner submits a request. Speed to lead wins the job.",
+  },
+  {
+    icon: MapPin,
+    title: "Hyper-Local Targeting",
+    description:
+      "Filter and claim leads by ZIP code, city, or trade type. Own your market — no bidding against other contractors for the same lead.",
   },
 ];
 
@@ -61,13 +61,13 @@ const FeaturesSection = () => {
             Features
           </span>
           <h2 className="mt-3 font-display text-4xl font-bold tracking-tight md:text-5xl">
-            Your Complete Digital
+            Your Exclusive
             <br />
-            <span className="text-gradient-primary">Growth Engine</span>
+            <span className="text-gradient-primary">Lead Generation Engine</span>
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Everything you need to generate, capture, and convert leads — built
-            specifically for trade contractors.
+            Everything you need to find, score, and claim qualified leads — built
+            exclusively for trade contractors.
           </p>
         </motion.div>
 

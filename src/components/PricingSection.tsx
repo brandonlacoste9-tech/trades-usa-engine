@@ -10,45 +10,44 @@ import { toast } from "sonner";
 const plans = [
   {
     ...STRIPE_TIERS.professional,
-    description: "Your complete revenue infrastructure — website, leads, and automation.",
+    description: "Everything you need to start capturing exclusive leads in your market.",
     features: [
-      "Custom high-convert website",
-      "1 City SEO landing page",
-      "Permit Radar access",
-      "SMS & Email automation",
-      "Planexa booking engine",
-      "Google Business Profile setup",
+      "Lead Radar dashboard",
+      "Permit Intelligence access",
+      "AI lead scoring",
+      "Instant SMS & email alerts",
+      "ZIP code lead filtering",
+      "Up to 50 leads / month",
     ],
     popular: false,
     elite: false,
   },
   {
     ...STRIPE_TIERS.dominator,
-    description: "Full market mastery with AI scoring and multi-city reach.",
+    description: "Full market dominance with unlimited leads and advanced AI scoring.",
     features: [
-      "Everything in Professional",
-      "5 City SEO landing pages",
-      "Full ROI Dashboard",
-      "AI lead scoring",
-      "Multi-channel automation (Email + SMS)",
+      "Everything in Starter",
+      "Unlimited lead claims",
+      "Multi-city market coverage",
+      "Advanced AI heat scoring",
+      "Telegram instant alerts",
+      "Priority lead delivery",
       "Monthly strategy sessions",
-      "Priority support",
     ],
     popular: true,
     elite: false,
   },
   {
     ...STRIPE_TIERS.empire,
-    description: "Exclusive ZIP code authority for contractors targeting luxury markets.",
+    description: "Exclusive ZIP code authority for contractors targeting luxury & high-value projects.",
     features: [
       "Everything in Dominator",
       "Luxury ZIP code targeting (90210, 33139, etc.)",
-      "Exclusive $250k+ Elite permits",
-      "Instant Telegram alerts",
+      "Exclusive $250k+ elite permits",
+      "First-to-claim priority queue",
       "Dedicated account strategist",
-      "White-glove onboarding",
-      "Weekly strategy calls",
-      "Custom integrations & API access",
+      "Custom trade & project filters",
+      "API access & integrations",
     ],
     popular: false,
     elite: true,
@@ -102,8 +101,8 @@ const PricingSection = () => {
             <span className="text-gradient-primary">No Per-Lead Fees.</span>
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Unlike Angi or HomeAdvisor, you pay one flat rate — no surprises, no
-            shared leads, no bidding wars.
+            Unlike Angi or HomeAdvisor, you pay one flat rate — exclusive leads,
+            no bidding wars, no shared contacts.
           </p>
         </motion.div>
 
