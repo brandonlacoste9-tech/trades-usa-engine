@@ -61,7 +61,7 @@ const BookingPage = () => {
       const { data } = await supabase
         .from("profiles")
         .select("*")
-        .eq("user_id", contractorId)
+        .eq("id", contractorId)
         .single();
       return data as Tables<"profiles"> | null;
     },

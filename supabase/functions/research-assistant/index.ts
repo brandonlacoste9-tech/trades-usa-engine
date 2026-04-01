@@ -1,3 +1,5 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers":
@@ -21,8 +23,13 @@ interface ToolCall {
 async function firecrawlSearch(
   apiKey: string,
   query: string,
-  limit = 5
+  requestedLimit = 5
 ): Promise<string> {
+  // HARD SAFETY: Never allow more than 5 results in a search, regardless of AI request.
+  const limit = Math.min(requestedLimit || 5, 5);
+  
+  console.log(`[Firecrawl] Executing search for: "${query}" with limit: ${limit}`);
+
   const res = await fetch("https://api.firecrawl.dev/v1/search", {
     method: "POST",
     headers: {
@@ -34,13 +41,16 @@ async function firecrawlSearch(
       limit,
       lang: "en",
       country: "us",
-      scrapeOptions: { formats: ["markdown"] },
     }),
   });
 
-  const data = await res.json();
-  if (!res.ok) return `Search error: ${JSON.stringify(data)}`;
+  if (!res.ok) {
+    const data = await res.json();
+    console.error(`[Firecrawl] Search error:`, data);
+    return `Search error: ${JSON.stringify(data)}`;
+  }
 
+  const data = await res.json();
   const results = (data.data ?? [])
     .map(
       (r: any, i: number) =>
@@ -55,6 +65,7 @@ async function firecrawlScrape(
   apiKey: string,
   url: string
 ): Promise<string> {
+  console.log(`[Firecrawl] Scraping URL: ${url}`);
   const res = await fetch("https://api.firecrawl.dev/v1/scrape", {
     method: "POST",
     headers: {
@@ -68,15 +79,19 @@ async function firecrawlScrape(
     }),
   });
 
-  const data = await res.json();
-  if (!res.ok) return `Scrape error: ${JSON.stringify(data)}`;
+  if (!res.ok) {
+    const data = await res.json();
+    console.error(`[Firecrawl] Scrape error:`, data);
+    return `Scrape error: ${JSON.stringify(data)}`;
+  }
 
+  const data = await res.json();
   const md = data.data?.markdown ?? "";
   // Truncate to keep within context window
   return md.slice(0, 8000) || "No content extracted.";
 }
 
-/* ─── Tool definitions for OpenAI ─── */
+/* ─── Tool definitions for OpenAI/DeepSeek ─── */
 
 const TOOLS = [
   {
@@ -84,17 +99,17 @@ const TOOLS = [
     function: {
       name: "search_web",
       description:
-        "Search the web for real-time information about building permits, contractors, market trends, or any topic. Returns scraped & summarised results from multiple pages.",
+        "Search the web for building permits, contractors, or market trends. STRICT LIMIT: Returning more than 5 results is forbidden to save credits.",
       parameters: {
         type: "object",
         properties: {
           query: {
             type: "string",
-            description: "The search query, e.g. 'new construction permits Miami FL 2025'",
+            description: "The search query, e.g. 'new construction permits Beverly Hills 2025'",
           },
           limit: {
             type: "number",
-            description: "Max results to return (1-10). Default 5.",
+            description: "Max results. HARD CAP: 5. Do not exceed.",
           },
         },
         required: ["query"],
@@ -106,13 +121,13 @@ const TOOLS = [
     function: {
       name: "scrape_page",
       description:
-        "Scrape and extract the main content from a specific URL. Returns the page content as clean markdown. Useful for reading permit databases, contractor profiles, or news articles.",
+        "Scrape the main content from a specific URL. Use only when search snippets are insufficient. Highly credit-efficient.",
       parameters: {
         type: "object",
         properties: {
           url: {
             type: "string",
-            description: "The full URL to scrape, e.g. 'https://austintexas.gov/building-permits'",
+            description: "The full URL to scrape.",
           },
         },
         required: ["url"],
@@ -121,22 +136,18 @@ const TOOLS = [
   },
 ];
 
-const SYSTEM_PROMPT = `You are the **Trades-USA Research Assistant** — an elite AI market intelligence agent built for contractors and trade professionals operating across the United States.
-
-Your capabilities:
-- **search_web**: Search the internet for building permits, market data, contractor information, zoning changes, and industry trends.
-- **scrape_page**: Extract detailed data from specific webpages, permit databases, government sites, and contractor directories.
+const SYSTEM_PROMPT = `You are the **Trades-USA Research Assistant**.
+Your goal is to provide high-quality market intelligence while being EXTREMELY CREDIT-EFFICIENT.
 
 Guidelines:
-1. When a user asks about permits, projects, or market data — USE YOUR TOOLS. Always search or scrape rather than relying on training data alone.
-2. Present data in a structured, actionable format. Use tables, bullet points, and clear categorization.
-3. Highlight high-value opportunities (projects >$50k, elite ZIP codes, hot trades like solar/HVAC/roofing).
-4. Always cite your sources with URLs when presenting scraped data.
-5. If a query is vague, ask one clarifying question before proceeding.
-6. Focus on actionable intelligence: lead quality, project timelines, estimated values, and competition density.
-7. You can chain multiple tool calls — e.g., search first to find relevant pages, then scrape specific results for deeper data.
+1. FIRECRAWL CREDITS ARE EXPENSIVE. Never perform redundant searches.
+2. If a user asks for a broad area (e.g., "Los Angeles"), start with ONE focused search. Do NOT try to scrape hundreds of pages.
+3. Your search_web tool is hard-capped at 5 results. Do not ask for more.
+4. Always prioritize quality over quantity. One well-scraped permit database is better than 10 generic search results.
+5. If you reach the info you need, stop immediately and summarize.
+6. CITE YOUR SOURCES.
 
-You are direct, data-driven, and focused on helping contractors win more high-value projects.`;
+You help contractors win high-value projects without wasting resources.`;
 
 /* ─── Main handler ─── */
 
@@ -146,31 +157,63 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const deepseekKey = Deno.env.get("DEEPSEEK_API_KEY");
-    const firecrawlKey = Deno.env.get("FIRECRAWL_API_KEY");
-
-    if (!deepseekKey) {
-      return new Response(
-        JSON.stringify({ error: "DEEPSEEK_API_KEY not configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-    if (!firecrawlKey) {
-      return new Response(
-        JSON.stringify({ error: "FIRECRAWL_API_KEY not configured" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
     const { messages: userMessages } = await req.json();
 
-    // Build conversation with system prompt
+    // ─── AUTH & SUBSCRIPTION GUARD ───
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      return new Response(JSON.stringify({ error: "No authorization header" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const supabase = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_ANON_KEY")!
+    );
+    
+    const supabaseAdmin = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+    );
+
+    const token = authHeader.replace("Bearer ", "");
+    const { data: { user }, error: authError } = await supabase.auth.getUser(token);
+
+    if (authError || !user) {
+      return new Response(JSON.stringify({ error: "Invalid session", details: authError }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Check subscription plan
+    const { data: profile, error: profileError } = await supabaseAdmin
+      .from("profiles")
+      .select("subscription_plan")
+      .eq("user_id", user.id)
+      .single();
+
+    if (profileError || !profile || profile.subscription_plan === "web_starter") {
+      return new Response(
+        JSON.stringify({ 
+          error: "SUBSCRIPTION_REQUIRED", 
+          message: "The AI Research Assistant is only available on paid plans (Lead Engine or higher). Please upgrade your subscription to continue." 
+        }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    // ─────────────────────────────────
+
     const conversationMessages: ChatMessage[] = [
       { role: "system", content: SYSTEM_PROMPT },
       ...userMessages,
     ];
 
-    // Agentic loop: keep calling OpenAI until we get a final text response
+    const deepseekKey = Deno.env.get("DEEPSEEK_API_KEY")!;
+    const firecrawlKey = Deno.env.get("FIRECRAWL_API_KEY")!;
+
     let iterations = 0;
     const MAX_ITERATIONS = 6;
 
@@ -190,7 +233,7 @@ Deno.serve(async (req) => {
             messages: conversationMessages,
             tools: TOOLS,
             tool_choice: "auto",
-            stream: false, // We stream the final answer only
+            stream: false,
           }),
         }
       );
@@ -198,7 +241,7 @@ Deno.serve(async (req) => {
       const completionData = await completionRes.json();
       if (!completionRes.ok) {
         return new Response(
-          JSON.stringify({ error: "OpenAI error", details: completionData }),
+          JSON.stringify({ error: "DeepSeek error", details: completionData }),
           { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
@@ -213,11 +256,8 @@ Deno.serve(async (req) => {
 
       const assistantMessage = choice.message;
 
-      // If no tool calls, we have the final answer
+      // Case 1: Final answer
       if (!assistantMessage.tool_calls || assistantMessage.tool_calls.length === 0) {
-        // Stream the final response
-        const finalContent = assistantMessage.content || "";
-
         const streamRes = await fetch(
           "https://api.deepseek.com/v1/chat/completions",
           {
@@ -230,7 +270,7 @@ Deno.serve(async (req) => {
               model: "deepseek-chat",
               messages: conversationMessages,
               tools: TOOLS,
-              tool_choice: "none", // Force text-only for streaming
+              tool_choice: "none",
               stream: true,
             }),
           }
@@ -238,12 +278,11 @@ Deno.serve(async (req) => {
 
         if (!streamRes.ok || !streamRes.body) {
           return new Response(
-            JSON.stringify({ content: finalContent }),
+            JSON.stringify({ content: assistantMessage.content || "" }),
             { headers: { ...corsHeaders, "Content-Type": "application/json" } }
           );
         }
 
-        // Pass through the SSE stream
         return new Response(streamRes.body, {
           headers: {
             ...corsHeaders,
@@ -254,50 +293,46 @@ Deno.serve(async (req) => {
         });
       }
 
-      // We have tool calls — execute them
+      // Case 2: Tool calls
       conversationMessages.push(assistantMessage);
 
-      const toolCalls: ToolCall[] = assistantMessage.tool_calls;
-
-      for (const tc of toolCalls) {
-        let result: string;
-        try {
-          const args = JSON.parse(tc.function.arguments);
-
-          if (tc.function.name === "search_web") {
-            console.log(`[Research] Searching: "${args.query}"`);
-            result = await firecrawlSearch(firecrawlKey, args.query, args.limit || 5);
-          } else if (tc.function.name === "scrape_page") {
-            console.log(`[Research] Scraping: ${args.url}`);
-            result = await firecrawlScrape(firecrawlKey, args.url);
-          } else {
-            result = `Unknown tool: ${tc.function.name}`;
-          }
-        } catch (e) {
-          result = `Tool execution error: ${e instanceof Error ? e.message : String(e)}`;
+    // HARD SAFETY: Limit tool calls per turn and overall
+    const toolCalls = (assistantMessage.tool_calls as any[]).slice(0, 3);
+    
+    for (const tc of toolCalls) {
+      // Increment a global counter if we had one, but for now we'll just be strict per turn
+      let result: string;
+      try {
+        const args = JSON.parse(tc.function.arguments);
+        if (tc.function.name === "search_web") {
+          // IMPORTANT: scrapeOptions removed to save credits. Search only returns snippets now.
+          result = await firecrawlSearch(firecrawlKey, args.query, args.limit);
+        } else if (tc.function.name === "scrape_page") {
+          result = await firecrawlScrape(firecrawlKey, args.url);
+        } else {
+          result = `Unknown tool: ${tc.function.name}`;
         }
-
-        conversationMessages.push({
-          role: "tool",
-          content: result,
-          tool_call_id: tc.id,
-        });
+      } catch (e) {
+        result = `Tool execution error: ${e instanceof Error ? e.message : String(e)}`;
       }
 
-      // Loop continues — OpenAI will process tool results and either call more tools or respond
+      conversationMessages.push({
+        role: "tool",
+        content: result,
+        tool_call_id: tc.id,
+      });
+    }
+      // Re-loop with tool results
     }
 
-    // Max iterations reached
     return new Response(
-      JSON.stringify({ error: "Max tool iterations reached" }),
+      JSON.stringify({ error: "Max iterations reached" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   } catch (error) {
     console.error("Research assistant error:", error);
     return new Response(
-      JSON.stringify({
-        error: error instanceof Error ? error.message : "Unknown error",
-      }),
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }

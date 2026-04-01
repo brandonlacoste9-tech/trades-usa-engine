@@ -23,6 +23,7 @@ import {
   BrainCircuit,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
 
 /* ─── Types ─── */
 interface ChatMessage {
@@ -48,11 +49,13 @@ async function streamChat(
 ) {
   const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
   const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const { data: { session } } = await supabase.auth.getSession();
+  const token = session?.access_token || anonKey;
 
   const res = await fetch(`${supabaseUrl}/functions/v1/research-assistant`, {
     method: "POST",
     headers: {
-      Authorization: `Bearer ${anonKey}`,
+      Authorization: `Bearer ${token}`,
       "Content-Type": "application/json",
     },
     body: JSON.stringify({ messages }),

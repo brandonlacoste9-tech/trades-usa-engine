@@ -63,7 +63,9 @@ const PricingSection = () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
-        toast.info("Sign in to subscribe");
+        toast.info("Sign in to complete your subscription");
+        // Store intent to subscribe to this plan after login/signup
+        localStorage.setItem("pending_price_id", priceId);
         navigate("/auth");
         return;
       }
@@ -76,8 +78,9 @@ const PricingSection = () => {
       if (data?.url) {
         window.open(data.url, "_blank");
       }
-    } catch (err: any) {
-      toast.error(err.message || "Failed to start checkout");
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "Failed to start checkout";
+      toast.error(errorMessage);
     } finally {
       setLoadingPlan(null);
     }

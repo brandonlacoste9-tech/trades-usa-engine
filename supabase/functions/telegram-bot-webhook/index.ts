@@ -6,6 +6,14 @@ const supabase = createClient(
 );
 
 const TELEGRAM_BOT_TOKEN = Deno.env.get("TELEGRAM_BOT_TOKEN")!;
+const DEEPSEEK_API_KEY = Deno.env.get("DEEPSEEK_API_KEY")!;
+
+const SYSTEM_PROMPT = `You are the Trades-USA Market Intelligence Bot. 
+Your goal is to help trade contractors (HVAC, Roofing, Plumbing, etc.) understand their market and new lead opportunities.
+You have access to permit data and market trends.
+Keep responses concise, professional, and focused on helping the contractor get more work.
+If you don't know something, be honest.
+Format your responses with Telegram HTML markup (e.g. <b>bold</b>, <i>italic</i>).`;
 
 Deno.serve(async (req) => {
   try {
@@ -14,16 +22,12 @@ Deno.serve(async (req) => {
     // Check if it's a message
     if (body.message && body.message.text) {
       const chatId = body.message.chat.id.toString();
-      const text = body.message.text.trim().toUpperCase();
-
-      // Look for a verification code pattern (e.g. TC-XXXXXX)
-      // Or just a 6-digit alphanum code if that's what we generate
-      const codeMatch = text.match(/[A-Z0-9]{6}/);
+      const text = body.message.text.trim();
+      const codeMatch = text.toUpperCase().match(/[A-Z0-9]{6}/);
       
+      // 1. Check for Verification Code (TC-XXXXXX or just 6 chars)
       if (codeMatch) {
         const code = codeMatch[0];
-        
-        // Find the profile with this code
         const { data: profile, error } = await supabase
           .from("profiles")
           .select("user_id, company_name")
@@ -31,7 +35,6 @@ Deno.serve(async (req) => {
           .single();
 
         if (profile && !error) {
-          // Update the chat ID and clear the code
           await supabase
             .from("profiles")
             .update({
@@ -40,17 +43,34 @@ Deno.serve(async (req) => {
             })
             .eq("user_id", profile.user_id);
 
-          // Confirm to the user on Telegram
-          await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              chat_id: chatId,
-              text: `✅ Success! Your account (${profile.company_name || "Contractor"}) is now linked to Trades-USA. You will receive lead alerts here moving forward.`,
-            }),
-          });
+          await sendTelegramMessage(chatId, `✅ <b>Success!</b> Your account (${profile.company_name || "Contractor"}) is now linked to Trades-USA.\nYou will receive real-time lead alerts here moving forward.`);
+          return new Response("OK", { status: 200 });
         }
       }
+
+      // 2. Handle as AI Query
+      console.log(`Processing AI query from ${chatId}: ${text}`);
+      
+      const aiResponse = await fetch("https://api.deepseek.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${DEEPSEEK_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "deepseek-chat",
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: text }
+          ],
+          max_tokens: 500,
+        }),
+      });
+
+      const aiData = await aiResponse.json();
+      const answer = aiData.choices?.[0]?.message?.content || "I'm sorry, I couldn't process that request right now.";
+
+      await sendTelegramMessage(chatId, answer);
     }
 
     return new Response("OK", { status: 200 });
@@ -59,3 +79,16 @@ Deno.serve(async (req) => {
     return new Response("Error", { status: 500 });
   }
 });
+
+async function sendTelegramMessage(chatId: string, text: string) {
+  const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text: text,
+      parse_mode: "HTML",
+    }),
+  });
+  return res.json();
+}

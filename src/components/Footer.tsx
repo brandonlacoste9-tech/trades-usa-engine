@@ -23,16 +23,16 @@ const Footer = () => {
           </div>
 
           <a
-            href="mailto:northern-ventures@outlook.com"
+            href={`mailto:${brand.email}`}
             className="flex items-center gap-2 text-sm text-muted-foreground hover:text-primary"
           >
             <Mail size={14} />
-            northern-ventures@outlook.com
+            {brand.email}
           </a>
         </div>
 
         <div className="mt-8 text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Trades USA — A Northern Ventures Company. All rights reserved.
+          © {new Date().getFullYear()} {brand.name} — A Northern Ventures Company. All rights reserved.
         </div>
       </div>
     </footer>

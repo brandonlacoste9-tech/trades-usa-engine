@@ -22,11 +22,23 @@ const Auth = () => {
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (session) {
-        navigate("/dashboard");
+        const pendingPriceId = localStorage.getItem("pending_price_id");
+        if (pendingPriceId) {
+          navigate("/dashboard?trigger_checkout=true", { replace: true });
+        } else {
+          navigate("/dashboard");
+        }
       }
     });
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) navigate("/dashboard");
+      if (session) {
+        const pendingPriceId = localStorage.getItem("pending_price_id");
+        if (pendingPriceId) {
+          navigate("/dashboard?trigger_checkout=true", { replace: true });
+        } else {
+          navigate("/dashboard");
+        }
+      }
     });
     return () => subscription.unsubscribe();
   }, [navigate]);
@@ -34,17 +46,26 @@ const Auth = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(true);
+    const { error, data } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
     if (error) {
       toast({ title: "Login failed", description: error.message, variant: "destructive" });
+    } else if (data.session) {
+      const pendingPriceId = localStorage.getItem("pending_price_id");
+      if (pendingPriceId) {
+        // We'll let the Dashboard handle the redirect to checkout to avoid race conditions with session setup
+        navigate("/dashboard?trigger_checkout=true", { replace: true });
+      } else {
+        navigate("/dashboard", { replace: true });
+      }
     }
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { error, data } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -56,7 +77,17 @@ const Auth = () => {
     if (error) {
       toast({ title: "Signup failed", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Check your email", description: "We sent you a confirmation link." });
+      if (data.session) {
+        // Direct signup (e.g. email verified automatically or not required in dev)
+        const pendingPriceId = localStorage.getItem("pending_price_id");
+        if (pendingPriceId) {
+          navigate("/dashboard?trigger_checkout=true", { replace: true });
+        } else {
+          navigate("/dashboard", { replace: true });
+        }
+      } else {
+        toast({ title: "Check your email", description: "We sent you a confirmation link." });
+      }
     }
   };
 

@@ -109,7 +109,7 @@ Deno.serve(async (req) => {
         },
         body: JSON.stringify({
           query: target.query,
-          limit: 5,
+          limit: 5, // HARD CAP: Always 5 per target
           lang: "en",
           country: "us",
           scrapeOptions: {
@@ -118,7 +118,7 @@ Deno.serve(async (req) => {
               {
                 type: "json",
                 schema: PERMIT_SCHEMA,
-                prompt: `Extract building permit data from this page. Look for permit numbers, descriptions of work, estimated values in USD, ZIP codes, addresses, owner names, and project types. If a field is not available, use empty string or 0 for value.`,
+                prompt: `Extract building permit data for ${target.city}, ${target.state}. Focus on permit numbers, project values, and descriptions. Return empty strings/0 if not found.`,
               },
             ],
           },

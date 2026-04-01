@@ -2,6 +2,8 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Calculator, DollarSign, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { STRIPE_TIERS } from "@/lib/stripe";
+import { brand } from "@/lib/brandConfig";
 
 const ROICalculator = () => {
   const [leadsPerMonth, setLeadsPerMonth] = useState(20);
@@ -10,7 +12,7 @@ const ROICalculator = () => {
 
   const monthlyRevenue = leadsPerMonth * (closeRate / 100) * avgJobValue;
   const annualRevenue = monthlyRevenue * 12;
-  const investmentCost = 349 * 12; // Lead Engine plan
+  const investmentCost = STRIPE_TIERS.professional.price * 12; // Lead Engine plan
   const roi = ((annualRevenue - investmentCost) / investmentCost) * 100;
 
   return (

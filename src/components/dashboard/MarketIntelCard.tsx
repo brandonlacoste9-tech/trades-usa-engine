@@ -63,7 +63,7 @@ const MarketIntelCard = ({ zipFilter, setZipFilter, subscriptionPlan }: MarketIn
       let query = supabase
         .from("scraped_inventory")
         .select("*")
-        .order("scraped_at", { ascending: false })
+        .order("created_at", { ascending: false })
         .limit(15);
       if (zipFilter) query = query.eq("zip_code", zipFilter);
       const { data } = await query;

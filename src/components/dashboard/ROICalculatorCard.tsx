@@ -11,7 +11,7 @@ const ROICalculatorCard = () => {
       const { data } = await supabase
         .from("scraped_inventory")
         .select("estimated_value, is_claimed, claimed_by")
-        .order("scraped_at", { ascending: false })
+        .order("created_at", { ascending: false })
         .limit(200);
       return (data ?? []) as any[];
     },

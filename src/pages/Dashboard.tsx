@@ -29,6 +29,30 @@ const Dashboard = () => {
   const [zipFilter, setZipFilter] = useState("");
   const { data: profile } = useUserProfile();
 
+  useState(() => {
+    const handleCheckoutTrigger = async () => {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("trigger_checkout") === "true") {
+        const priceId = localStorage.getItem("pending_price_id");
+        if (priceId) {
+          try {
+            const { data, error } = await supabase.functions.invoke("create-checkout", {
+              body: { priceId },
+            });
+            if (error) throw error;
+            if (data?.url) {
+              localStorage.removeItem("pending_price_id");
+              window.location.href = data.url;
+            }
+          } catch (err) {
+            console.error("Failed to trigger checkout:", err);
+          }
+        }
+      }
+    };
+    handleCheckoutTrigger();
+  });
+
   const { data: leads = [] } = useQuery({
     queryKey: ["leads"],
     queryFn: async () => {
@@ -160,9 +184,25 @@ const Dashboard = () => {
                 <Radar size={18} className="text-primary" /> Lead Radar
               </h2>
               {leads.length === 0 ? (
-                <p className="mt-6 text-center text-sm text-muted-foreground">
-                  No leads yet. Use the Research Assistant to start claiming permit leads.
-                </p>
+                <div className="mt-6 text-center space-y-4">
+                  <p className="text-sm text-muted-foreground">
+                    No leads yet. Use the Research Assistant to start claiming permit leads.
+                  </p>
+                  <button 
+                    onClick={() => {
+                      const el = document.getElementById('settings');
+                      if (el) {
+                        el.scrollIntoView({ behavior: 'smooth' });
+                        el.classList.add('ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-background');
+                        setTimeout(() => el.classList.remove('ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-background'), 2000);
+                      }
+                    }}
+                    className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow-lg shadow-primary/25 hover:bg-primary/90 transition-all active:scale-95"
+                  >
+                    Setup Telegram
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </button>
+                </div>
               ) : (
                 <div className="mt-4 space-y-3">
                   {leads.slice(0, 10).map((lead) => (
@@ -205,12 +245,14 @@ const Dashboard = () => {
           {/* Right column */}
           <div className="space-y-6">
             <ROICalculatorCard />
-            {profile?.user_id && (
-              <ProfileSettingsCard
-                userId={profile.user_id}
-                telegramChatId={profile.telegram_chat_id}
-                telegramBotToken={profile.telegram_bot_token}
-              />
+            {profile?.id && (
+              <div id="settings">
+                <ProfileSettingsCard
+                  userId={profile.id}
+                  telegramChatId={profile.telegram_chat_id}
+                  telegramBotToken={profile.telegram_bot_token}
+                />
+              </div>
             )}
           </div>
         </div>

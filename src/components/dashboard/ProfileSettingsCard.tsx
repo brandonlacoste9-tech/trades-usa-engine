@@ -52,7 +52,7 @@ const ProfileSettingsCard = ({ userId, telegramChatId, telegramBotToken }: Profi
           telegram_chat_id: chatId || null,
           telegram_bot_token: botToken || null
         } as any)
-        .eq("user_id", userId);
+        .eq("id", userId);
 
       if (error) {
         toast.error("Failed to save settings");
@@ -81,7 +81,7 @@ const ProfileSettingsCard = ({ userId, telegramChatId, telegramBotToken }: Profi
           telegram_verification_code: code,
           updated_at: new Date().toISOString() 
         } as any)
-        .eq("user_id", userId);
+        .eq("id", userId);
 
       toast.info("Verification code generated. Please message the bot.");
 
@@ -90,11 +90,11 @@ const ProfileSettingsCard = ({ userId, telegramChatId, telegramBotToken }: Profi
         const { data } = await supabase
           .from("profiles")
           .select("telegram_chat_id")
-          .eq("user_id", userId)
+          .eq("id", userId)
           .single();
           
         if (data?.telegram_chat_id) {
-          setChatId(data.telegram_chat_id);
+          setChatId(data.telegram_chat_id ?? "");
           setPolling(false);
           setTelegramCode(null);
           toast.success("Telegram connected successfully!");
@@ -237,7 +237,7 @@ const ProfileSettingsCard = ({ userId, telegramChatId, telegramBotToken }: Profi
                     href={`https://t.me/${brand.ID === "USA" ? "TradesUSABot" : "TradesCanadaBot"}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary/10 border border-primary/20 py-2.5 text-xs font-bold text-primary hover:bg-primary/20 transition-all transition-colors"
+                    className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary/10 border border-primary/20 py-2.5 text-xs font-bold text-primary hover:bg-primary/20 transition-all duration-300"
                   >
                     <MessageCircle size={14} />
                     Open @{brand.ID === "USA" ? "TradesUSABot" : "TradesCanadaBot"}
@@ -264,7 +264,7 @@ const ProfileSettingsCard = ({ userId, telegramChatId, telegramBotToken }: Profi
 
           <p className="mt-4 text-[10px] text-muted-foreground leading-relaxed">
             {brand.adjective} contractors receive instant Telegram alerts for high-value building permits the second they are issued.
-          </p>Section
+          </p>
         </section>
       </div>
     </div>

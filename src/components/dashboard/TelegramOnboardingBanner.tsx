@@ -47,16 +47,20 @@ export default function TelegramOnboardingBanner({ isConnected }: Props) {
           </div>
 
           <div className="flex items-center gap-3 w-full md:w-auto">
-            <Link 
-              to="/dashboard" // Assuming settings is a section in dashboard or /settings
+            <button 
               onClick={() => {
-                // You could add logic here to scroll to or switch to settings tab if it's on the same page
+                const el = document.getElementById('settings');
+                if (el) {
+                  el.scrollIntoView({ behavior: 'smooth' });
+                  el.classList.add('ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-background');
+                  setTimeout(() => el.classList.remove('ring-2', 'ring-primary', 'ring-offset-2', 'ring-offset-background'), 2000);
+                }
               }}
               className="inline-flex items-center justify-center px-6 py-3 rounded-xl bg-primary text-primary-foreground text-sm font-bold shadow-lg shadow-primary/25 hover:bg-primary/90 transition-all active:scale-95 flex-1 md:flex-none"
             >
               Setup Telegram
               <ArrowRight className="w-4 h-4 ml-2" />
-            </Link>
+            </button>
             <button 
               onClick={() => setDismissed(true)}
               className="p-3 rounded-xl bg-white/[0.03] border border-white/10 text-muted-foreground hover:text-foreground hover:bg-white/[0.08] transition-all"
